@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-3">
+            <br><br>
+            <label for="name">Network Name:</label>
+            <input id="network-name" type="text" class="form-control">
+            <br>
+            <label for="type">Type:</label>
+            <select id="type" class="form-control">
+                <option>Linear</option>
+                <option>ReLU</option>
+                <option>Sigmoid</option>
+            </select>
+            <label for="in">In:</label>
+            <input id="in" type="text" class="form-control">
+            <label for="out">Out:</label>
+            <input id="out" type="text" class="form-control">
+            <br>
+            <button id="add" class="btn btn-secondary">Add</button>
+        </div>
+        <div class="col-9">
+            <br><br>
+            <ul id="layer-list">
+                <li id="network-label" class="list-group-item text-light bg-secondary">Network:</li>
+            </ul>
+            <ul id="layer-list">
+            </ul>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="container">
+    <div class="row">
+        <button id="create" class="col-2 btn btn-secondary" style="margin-right:10px;">Create</button>
+    </div>
+</div>
+<br>
+
+<script>
+    let layers = {};
+    let add = document.getElementById("add");
+    add.onclick = (event) => {
+        let layer_list = document.getElementById("layer-list");
+        let type = document.getElementById("type").selectedOptions[0].innerHTML;
+        let in_node = document.getElementById("in").value;
+        let out_node = document.getElementById("out").value;
+        let li = document.createElement("li");
+        let layer;
+        // レイヤーに活性化関数(ReLU/Sigmoid)が選ばれた場合はノード数を省く
+        if (type == "ReLU" || type == "Sigmoid") {
+            li.innerHTML = "type: " + type;
+            layer = { "type": type };
+        } else {
+            // ノード数が未入力だった場合警告、return
+            if (!in_node || !out_node) {
+                alert("ノード数を入力してください。");
+                return;
+            }
+            // ノード数が数値以外だった場合警告、return
+            if (isNaN(in_node) || isNaN(out_node)) {
+                alert("ノード数には数値を入力してください。");
+                return;
+            }
+            li.innerHTML = "type: " + type + ", in: " + in_node + ", out: " + out_node;
+            layer = { "type": type, "in": in_node, "out": out_node };
+        }
+        li.classList.add("list-group-item");
+        layer_list.appendChild(li);
+        layers[layer_list.childElementCount - 2] = layer;
+    };
+
+    let network_name = document.getElementById("network-name");
+    network_name.onchange = (event) => {
+        let network_label = document.getElementById("network-label");
+        network_label.innerHTML = "Network: " + network_name.value;
+    };
+
+    let create = document.getElementById("create");
+    create.onclick = (event) => {
+        let name = document.getElementById("network-name").value;
+        // ネットワーク名が未入力の場合警告、return
+        if (!name) {
+            alert("ネットワーク名を入力してください。");
+            return;
+        }
+        // レイヤーが存在しない場合警告、return
+        if (!Object.keys(layers).length) {
+            alert("登録するレイヤーがありません。");
+            return;
+        }
+        $.ajax({
+            url: "/register_network",
+            type: "POST",
+            data: JSON.stringify({"name": name, "layers": layers}),
+            dataType: "json",
+            contentType: 'application/json',
+        }).done((res) => {
+            alert(res['result']);
+        }).fail((request, status, error) => {
+            alert(status);
+        });
+    };
+</script>
+{% endblock %}

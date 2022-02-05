@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-3">
+            <br><br>
+            <label>Select Network:</label>
+            <select class="form-control" id="select-network">
+                {% for network in networks %}
+                <option>{{ network }}</option>
+                {% endfor %}
+            </select>
+            <label>Select Optimizer:</label>
+            <select class="form-control" id="select-optimizer">
+                <option>SGD</option>
+                <option>Adam</option>
+            </select>
+            <label>Select Loss Function:</label>
+            <select class="form-control" id="select-loss-function">
+                <option>MSE</option>
+                <option>CrossEntropyLoss</option>
+            </select>
+            <label>Select Dataset:</label>
+            <select class="form-control" id="select-dataset">
+                {% for dataset in datasets | reverse %}
+                <option>{{ dataset }}</option>
+                {% endfor %}
+            </select>
+            <label for="epochs">Epochs:</label>
+            <input id="epochs" type="text" class="form-control">
+            <label for="batch-size">Batch Size:</label>
+            <input id="batch-size" type="text" class="form-control">
+            <label for="learning-rate">Learning Rate</label>
+            <input id="learning-rate" type="text" class="form-control">
+            <br>
+        </div>
+        <div class="col-9">
+            <br><br>
+            <ul id="result">
+                <li id="result-label" class="list-group-item text-light bg-secondary">Result:</li>
+            </ul>
+            <div align="center">
+                <img id="result-img" width="80%">
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="container">
+    <div class="row">
+        <button id="run" class="col-2 btn btn-secondary" style="margin-right:10px;">Run</button>
+        <button id="clear" class="col-2 btn btn-secondary" style="margin-right:10px;">Clear</button>
+        <button id="delete" class="col-2 btn btn-secondary" style="margin-right:10px;">Delete</button>
+    </div>
+</div>
+<br>
+{% endblock %}
