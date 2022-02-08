@@ -91,7 +91,6 @@
             dataType: "json",
             contentType: "application/json"
         }).done((res) => {
-            alert(res["result"]);
             let img = document.getElementById("result-img");
             img.src = res["result"];
         }).fail((request, status, error) => {

@@ -23,7 +23,7 @@ def register_network():
     fname = os.path.join(path, 'architecture.json')
     with open(fname, 'w') as f:
         json.dump(layers, f, indent=4)
-    return jsonify({'result': 'ok'})
+    return jsonify({'result': '新しいネットワークを登録しました。'})
 
 @app.route('/optimize')
 def optimize():

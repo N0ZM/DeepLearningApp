@@ -1,3 +1,4 @@
+from sys import exc_info
 from flask import Flask, render_template, redirect, request, jsonify
 import os
 import json
@@ -10,9 +11,16 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import shutil
+import logging
 
 
 app = Flask(__name__)
+
+file_handler = logging.FileHandler('logs/error.log', encoding='utf-8', mode='a')
+file_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s:%(levelname)s-%(message)s')
+file_handler.setFormatter(formatter)
+app.logger.addHandler(file_handler)
 
 @app.route('/')
 def index():
@@ -33,7 +41,7 @@ def register_network():
     fname = os.path.join(path, 'architecture.json')
     with open(fname, 'w') as f:
         json.dump(layers, f, indent=4)
-    return jsonify({'result': 'ok'})
+    return jsonify({'result': '新しいネットワークを登録しました。'})
 
 @app.route('/optimize')
 def optimize():
@@ -72,31 +80,35 @@ def run_optimize():
     net_path = os.path.join(app.root_path, 'static/networks', network, 'architecture.json')
     with open(net_path, 'r') as f:
         architecture = json.load(f)
-    net = Net(architecture)
-    # もし前回保存したパラメータがあれば読み込む
-    param_path = os.path.join(app.root_path, 'static/networks', network, 'model.prm')
-    if os.path.exists(param_path):
-        params = torch.load(param_path)
-        net.load_state_dict(params)
+    try:
+        net = Net(architecture)
+        # もし前回保存したパラメータがあれば読み込む
+        param_path = os.path.join(app.root_path, 'static/networks', network, 'model.prm')
+        if os.path.exists(param_path):
+            params = torch.load(param_path)
+            net.load_state_dict(params)
 
-    if optimizer == 'SGD':
-        opt = optim.SGD(net.parameters(), lr=float(lr))
-    elif optimizer == 'Adam':
-        opt = optim.Adam(net.parameters(), lr=float(lr))
+        if optimizer == 'SGD':
+            opt = optim.SGD(net.parameters(), lr=float(lr))
+        elif optimizer == 'Adam':
+            opt = optim.Adam(net.parameters(), lr=float(lr))
 
-    if loss_function == 'MSE':
-        loss_fn = nn.MSELoss()
-    elif loss_function == 'CrossEntropyLoss':
-        loss_fn = nn.CrossEntropyLoss()
+        if loss_function == 'MSE':
+            loss_fn = nn.MSELoss()
+        elif loss_function == 'CrossEntropyLoss':
+            loss_fn = nn.CrossEntropyLoss()
 
-    X = torch.tensor(X, dtype=torch.float32)
-    t = torch.tensor(t, dtype=torch.float32)
-    dataset = TensorDataset(X, t)
-    data_loader = DataLoader(dataset, batch_size=int(batch_size), shuffle=True)
+        X = torch.tensor(X, dtype=torch.float32)
+        t = torch.tensor(t, dtype=torch.float32)
+        dataset = TensorDataset(X, t)
+        data_loader = DataLoader(dataset, batch_size=int(batch_size), shuffle=True)
 
-    result = train(net, data_loader, opt, loss_fn, int(epochs))
-    # 学習済みのパラメータを保存する
-    torch.save(net.state_dict(), param_path)
+        result = train(net, data_loader, opt, loss_fn, int(epochs))
+        # 学習済みのパラメータを保存する
+        torch.save(net.state_dict(), param_path)
+    except Exception as ex:
+        app.logger.error(ex, exc_info=True)
+        return jsonify({'result': 'モデル最適化時にエラーが発生しました。'})
 
     return jsonify({'result': result})
 

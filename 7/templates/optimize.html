@@ -23,7 +23,7 @@
             </select>
             <label>Select Dataset:</label>
             <select class="form-control" id="select-dataset">
-                {% for dataset in datasets | reverse %}
+                {% for dataset in datasets %}
                 <option>{{ dataset }}</option>
                 {% endfor %}
             </select>
@@ -91,7 +91,6 @@
             dataType: "json",
             contentType: "application/json"
         }).done((res) => {
-            alert(res["result"]);
             let img = document.getElementById("result-img");
             img.src = res["result"];
         }).fail((request, status, error) => {

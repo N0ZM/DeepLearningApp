@@ -13,7 +13,7 @@
                 </select>
                 <label>Select Dataset:</label>
                 <select class="form-control" id="select-dataset" name="select_dataset">
-                    {% for dataset in datasets | reverse %}
+                    {% for dataset in datasets %}
                     <option>{{ dataset }}</option>
                     {% endfor %}
                 </select>

@@ -64,6 +64,11 @@
                 alert("ノード数には数値を入力してください。");
                 return;
             }
+            // 自然数以外の数値が入力された場合警告、return
+            if (!Number.isInteger(Number(in_node)) || !Number.isInteger(Number(out_node))) {
+                alert("ノード数には自然数を入力してください。");
+                return;
+            }
             li.innerHTML = "type: " + type + ", in: " + in_node + ", out: " + out_node;
             layer = { "type": type, "in": in_node, "out": out_node };
         }
@@ -100,7 +105,7 @@
         }).done((res) => {
             alert(res['result']);
         }).fail((request, status, error) => {
-            alert(status);
+            alert(error);
         });
     };
 </script>

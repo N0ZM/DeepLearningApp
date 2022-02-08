@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, jsonify, session
+from flask import Flask, render_template, redirect, request, jsonify
 import os
 import json
 import numpy as np
@@ -10,10 +10,16 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import shutil
+import logging
 
 
 app = Flask(__name__)
-app.secret_key = 'top_secret'
+
+file_handler = logging.FileHandler('logs/error.log', encoding='utf-8', mode='a')
+file_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s:%(levelname)s-%(message)s')
+file_handler.setFormatter(formatter)
+app.logger.addHandler(file_handler)
 
 @app.route('/')
 def index():
@@ -34,7 +40,7 @@ def register_network():
     fname = os.path.join(path, 'architecture.json')
     with open(fname, 'w') as f:
         json.dump(layers, f, indent=4)
-    return jsonify({'result': 'ok'})
+    return jsonify({'result': '新しいネットワークを登録しました。'})
 
 @app.route('/optimize')
 def optimize():
@@ -190,8 +196,9 @@ def delete():
     # 選ばれたネットワークに該当するフォルダを削除
     if os.path.exists(path):
         shutil.rmtree(path)
-        return jsonify({'result': 'ネットワーク「{}」は既に削除されています。'.format(network)})
-    return jsonify({'result': 'ネットワーク「{}」を削除しました。'.format(network)})
+        return jsonify({'result': 'ネットワーク「{}」を削除しました。'.format(network)})
+    return jsonify({'result': 'ネットワーク「{}」は既に削除されています。'.format(network)})
+    
 
 @app.route('/run_evaluate', methods=['POST'])
 def run_evaluate():
